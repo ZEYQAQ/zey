@@ -1,0 +1,36 @@
+# 编译产物(go build 生成的二进制)
+/zey
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试与覆盖率文件
+*.test
+*.out
+coverage.*
+profile.out
+
+# Go 工作区文件(go.mod / go.sum 需要提交,不要忽略)
+go.work
+go.work.sum
+
+# vendor 目录(本项目用 module 模式,不提交 vendor)
+/vendor/
+
+# 编辑器 / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 本地环境变量 / 密钥
+.env
+.env.local
+*.local
