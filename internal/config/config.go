@@ -35,6 +35,15 @@ func Path() (string, error) {
 	return filepath.Join(dir, "config.json"), nil
 }
 
+// ExportsDir 返回存档目录 ~/.zey/exports,export 默认把文件写到这里。
+func ExportsDir() (string, error) {
+	dir, err := Dir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "exports"), nil
+}
+
 // Load 读取配置。文件不存在时返回一个空配置(而不是报错),
 // 这样用户第一次用还没配置过也能正常跑。
 func Load() (*Config, error) {
