@@ -66,7 +66,16 @@ func newEnvGetCmd() *cobra.Command {
 		Use:     "get <type/name>",
 		Short:   "查看工作负载各容器的环境变量",
 		Example: "  zey env get deploy/nginx\n  zey env get nginx        # 不写类型默认 deployment",
-		Args:    cobra.ExactArgs(1), // 必须正好 1 个参数
+		Args: func(cmd *cobra.Command, args []string) error {
+			switch len(args) {
+			case 1:
+				return nil
+			case 0:
+				return fmt.Errorf("请指定要查看的工作负载,例如:zey env get deploy/nginx(类型可省略,默认 deployment)")
+			default:
+				return fmt.Errorf("只接受一个参数(资源引用 type/name),例如:zey env get deploy/nginx")
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			kind, name, err := parseRef(args[0])
 			if err != nil {

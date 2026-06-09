@@ -31,7 +31,8 @@ func newRootCmd() *cobra.Command {
   • config                配置 k8s 连接信息(kubeconfig / context / namespace)
   • export                导出命名空间下的 Service / Deployment / ConfigMap
   • apply                 把导出的文件重新应用回集群
-  • nginxExporterInit     一键安装 nginx-prometheus-exporter 并用 systemd 托管`,
+  • nginxExporterInit     一键安装 nginx-prometheus-exporter 并用 systemd 托管
+  • install               把 zey 自身装到 PATH(/usr/bin),之后可直接运行 zey`,
 		SilenceUsage:  true, // 出错时不要把一大坨用法说明也打出来
 		SilenceErrors: true, // 错误统一交给 main 打印
 	}
@@ -47,6 +48,7 @@ func newRootCmd() *cobra.Command {
 		newExportCmd(),
 		newApplyCmd(),
 		newNginxExporterInitCmd(),
+		newInstallCmd(),
 	)
 	return root
 }

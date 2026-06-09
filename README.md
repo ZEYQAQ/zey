@@ -9,6 +9,7 @@
 cd zey
 go mod tidy      # 下载依赖(client-go、cobra 等)
 go build -o zey  # 编译出二进制
+sudo ./zey install   # 可选:装到 /usr/bin,之后任意目录直接敲 zey
 ```
 
 ## 功能
@@ -22,6 +23,7 @@ go build -o zey  # 编译出二进制
 | `zey export [-o file] [-A]` | 导出 Service / Deployment / ConfigMap(默认存档到 `~/.zey/exports/`) |
 | `zey apply [-f file]` | 应用存档回集群(默认取 `~/.zey/exports/` 最新一份) |
 | `zey nginxExporterInit` | 一键安装 nginx-prometheus-exporter 并用 systemd 开机自启托管 |
+| `zey install` | 把 zey 自身装到 PATH(默认 `/usr/bin`),之后任意目录可直接运行 zey |
 
 工作负载类型支持 `deployment`(默认)、`statefulset`、`daemonset`,可用简写 `deploy/sts/ds`。
 
