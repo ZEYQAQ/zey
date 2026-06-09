@@ -30,7 +30,8 @@ func newRootCmd() *cobra.Command {
   • env get/set/schedule  查看 / 立即修改 / 定时修改 工作负载环境变量
   • config                配置 k8s 连接信息(kubeconfig / context / namespace)
   • export                导出命名空间下的 Service / Deployment / ConfigMap
-  • apply                 把导出的文件重新应用回集群`,
+  • apply                 把导出的文件重新应用回集群
+  • nginxExporterInit     一键安装 nginx-prometheus-exporter 并用 systemd 托管`,
 		SilenceUsage:  true, // 出错时不要把一大坨用法说明也打出来
 		SilenceErrors: true, // 错误统一交给 main 打印
 	}
@@ -45,6 +46,7 @@ func newRootCmd() *cobra.Command {
 		newEnvCmd(),
 		newExportCmd(),
 		newApplyCmd(),
+		newNginxExporterInitCmd(),
 	)
 	return root
 }

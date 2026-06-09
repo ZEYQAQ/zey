@@ -19,8 +19,9 @@ go build -o zey  # 编译出二进制
 | `zey env get <type/name>` | 查看工作负载各容器的环境变量 |
 | `zey env set <type/name> K=V K2-` | 立即修改环境变量(`K=V` 设置,`K-` 删除) |
 | `zey env schedule <type/name> K=V --at/--after/--every` | 定时修改环境变量 |
-| `zey export [-o file] [-A]` | 导出 Service / Deployment / ConfigMap |
-| `zey apply -f file` | 把导出的 YAML 重新应用回集群 |
+| `zey export [-o file] [-A]` | 导出 Service / Deployment / ConfigMap(默认存档到 `~/.zey/exports/`) |
+| `zey apply [-f file]` | 应用存档回集群(默认取 `~/.zey/exports/` 最新一份) |
+| `zey nginxExporterInit` | 一键安装 nginx-prometheus-exporter 并用 systemd 开机自启托管 |
 
 工作负载类型支持 `deployment`(默认)、`statefulset`、`daemonset`,可用简写 `deploy/sts/ds`。
 
@@ -42,9 +43,13 @@ zey env schedule deploy/nginx MAINTENANCE=on --after 30m
 zey env schedule deploy/nginx MAINTENANCE=on --at '2026-06-08 02:00'
 zey env schedule deploy/nginx HEARTBEAT=tick --every 1h   # 周期任务,Ctrl-C 停止
 
-# 5) 导出 / 应用
-zey export -o backup.yaml
-zey apply -f backup.yaml
+# 5) 导出 / 应用(默认存档到 ~/.zey/exports/,自动带时间戳)
+zey export                 # 存档当前命名空间,结束打印文件路径
+zey apply                  # 应用最新一份存档(也可 -f 指定文件)
+
+# 6) 在本机安装 nginx exporter 并交给 systemd 托管(需 Linux + root)
+sudo zey nginxExporterInit
+zey nginxExporterInit --dry-run   # 任意系统预览将执行的操作
 
 # 全局 flag 可临时覆盖配置
 zey env get deploy/nginx -n other-ns --context prod
@@ -63,4 +68,6 @@ internal/
     client.go              连接集群
     env.go                 环境变量增删改查(含乐观锁重试)
     resources.go           导出/应用 svc、deploy、cm
+  nginxexporter/
+    install.go             安装 nginx exporter + 注册 systemd 服务
 ```
