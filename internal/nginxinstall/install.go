@@ -2,6 +2,7 @@
 package nginxinstall
 
 import (
+	_ "embed"
 	"fmt"
 	"io"
 	"net"
@@ -14,6 +15,14 @@ import (
 	"strings"
 	"time"
 )
+
+// embeddedNginxSrc 是打进二进制的 nginx 源码包,作为默认源(无需联网或 --source)。
+//
+//go:embed assets/nginx-1.31.1.tar.gz
+var embeddedNginxSrc []byte
+
+// embeddedNginxVersion 是内置源码包的版本。
+const embeddedNginxVersion = "1.31.1"
 
 // Installer 持有一次 nginx 源码安装所需的配置。
 type Installer struct {
@@ -166,7 +175,7 @@ func (i *Installer) Run() error {
 	pkgMgr := detectPkgMgr()
 	conf := strings.ReplaceAll(nginxConfTemplate, "__STUB_PORT__", strconv.Itoa(i.StubStatusPort))
 
-	local, err := i.localSource()
+	local, err := i.explicitSource()
 	if err != nil {
 		return err
 	}
@@ -197,7 +206,12 @@ func (i *Installer) Run() error {
 			return err
 		}
 	default:
-		return errNoSource
+		// 默认:用打包进二进制的内置源码包,无需联网或 --source
+		tarball = filepath.Join(buildRoot, "nginx-"+embeddedNginxVersion+".tar.gz")
+		fmt.Fprintf(i.Out, "使用内置源码包 nginx-%s(已打包进 zey)\n", embeddedNginxVersion)
+		if err := os.WriteFile(tarball, embeddedNginxSrc, 0o644); err != nil {
+			return fmt.Errorf("释放内置源码包失败: %w", err)
+		}
 	}
 
 	// [1/8] 解压
@@ -278,26 +292,15 @@ func (i *Installer) Run() error {
 	return nil
 }
 
-var errNoSource = fmt.Errorf("未找到 nginx 源码包:用 --source 指定 .tar.gz,或 cd 到源码包所在目录,或用 --version 指定下载版本")
-
-// localSource 解析本地源码包:显式 --source 优先,否则在当前目录找 nginx-*.tar.gz。
-// 找不到返回 ("", nil),交由上层决定下载或报错。
-func (i *Installer) localSource() (string, error) {
-	if i.Source != "" {
-		if _, err := os.Stat(i.Source); err != nil {
-			return "", fmt.Errorf("指定的源码包不存在: %s", i.Source)
-		}
-		return i.Source, nil
-	}
-	matches, _ := filepath.Glob("nginx-*.tar.gz")
-	switch len(matches) {
-	case 0:
+// explicitSource 返回用户用 --source 显式指定的源码包;没指定返回 ("", nil)。
+func (i *Installer) explicitSource() (string, error) {
+	if i.Source == "" {
 		return "", nil
-	case 1:
-		return matches[0], nil
-	default:
-		return "", fmt.Errorf("当前目录有多个 nginx-*.tar.gz,请用 --source 指定: %v", matches)
 	}
+	if _, err := os.Stat(i.Source); err != nil {
+		return "", fmt.Errorf("指定的源码包不存在: %s", i.Source)
+	}
+	return i.Source, nil
 }
 
 // printPlan 在 dry-run 模式打印将执行的全部步骤与生成的文件。
@@ -313,8 +316,8 @@ func (i *Installer) printPlan(local, pkgMgr, conf string) {
 		srcDesc = "下载: " + nginxDownloadURL(i.Version)
 		srcDir = filepath.Join(buildRoot, "nginx-"+i.Version)
 	default:
-		srcDesc = "(未指定!需要 --source 或 --version)"
-		srcDir = filepath.Join(buildRoot, "nginx-<版本>")
+		srcDesc = fmt.Sprintf("内置源码包 nginx-%s(已打包进 zey,%s)", embeddedNginxVersion, humanSize(len(embeddedNginxSrc)))
+		srcDir = filepath.Join(buildRoot, "nginx-"+embeddedNginxVersion)
 	}
 
 	fmt.Fprintln(i.Out, "[dry-run] 仅预览,不会实际安装。将执行:")
@@ -458,6 +461,10 @@ func indent(s, prefix string) string {
 		lines[idx] = prefix + lines[idx]
 	}
 	return strings.Join(lines, "\n")
+}
+
+func humanSize(n int) string {
+	return fmt.Sprintf("%.1f MB", float64(n)/(1024*1024))
 }
 
 func primaryIP() string {

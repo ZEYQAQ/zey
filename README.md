@@ -22,7 +22,7 @@ sudo ./zey install   # 可选:装到 /usr/bin,之后任意目录直接敲 zey
 | `zey env schedule <type/name> K=V --at/--after/--every` | 定时修改环境变量 |
 | `zey export [-o file] [-A]` | 导出 Service / Deployment / ConfigMap(默认存档到 `~/.zey/exports/`) |
 | `zey apply [-f file]` | 应用存档回集群(默认取 `~/.zey/exports/` 最新一份) |
-| `zey nginxInstall` | 从源码编译安装 nginx(含 stub_status,systemd 托管) |
+| `zey nginxInstall` | 从源码编译安装 nginx(源码包内置在二进制里,含 stub_status,systemd 托管) |
 | `zey nginxExporterInit` | 一键安装 nginx-prometheus-exporter 并用 systemd 开机自启托管 |
 | `zey install` | 把 zey 自身装到 PATH(默认 `/usr/bin`),之后任意目录可直接运行 zey |
 
@@ -51,7 +51,7 @@ zey export                 # 存档当前命名空间,结束打印文件路径
 zey apply                  # 应用最新一份存档(也可 -f 指定文件)
 
 # 6) 本机运维(需 Linux + root):源码编译装 nginx + 装 exporter,都交给 systemd
-sudo zey nginxInstall --source ./nginx-1.31.1.tar.gz   # 编译装 nginx,stub_status 监听 :8081
+sudo zey nginxInstall                                  # 用内置源码包编译装 nginx,stub_status :8081
 sudo zey nginxExporterInit                             # 装 exporter,默认采集 :8081
 # 任意系统可加 --dry-run 预览全部步骤,不实际执行
 
