@@ -23,7 +23,7 @@ func newNginxExporterInitCmd() *cobra.Command {
 注意:依赖 systemd,需在 Linux 上以 root 运行(sudo)。
 可加 --dry-run 在任意系统预览将执行的操作与生成的 unit 文件。`,
 		Example: "  sudo zey nginxExporterInit\n" +
-			"  sudo zey nginxExporterInit --listen :9113 --scrape-uri http://127.0.0.1:8080/stub_status\n" +
+			"  sudo zey nginxExporterInit --listen :9113 --scrape-uri http://127.0.0.1:8081/stub_status\n" +
 			"  zey nginxExporterInit --dry-run",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -33,7 +33,7 @@ func newNginxExporterInitCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&inst.Version, "version", "latest", "exporter 版本,latest=取 GitHub 最新")
 	cmd.Flags().StringVar(&inst.Listen, "listen", ":9113", "exporter 监听地址")
-	cmd.Flags().StringVar(&inst.ScrapeURI, "scrape-uri", "http://127.0.0.1:8080/stub_status", "nginx stub_status 地址")
+	cmd.Flags().StringVar(&inst.ScrapeURI, "scrape-uri", "http://127.0.0.1:8081/stub_status", "nginx stub_status 地址")
 	cmd.Flags().StringVar(&inst.InstallDir, "install-dir", "/usr/local/bin", "二进制安装目录")
 	cmd.Flags().BoolVar(&inst.DryRun, "dry-run", false, "只预览将执行的操作,不实际安装")
 	return cmd
